@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from helper import AuthType
 from api.models.common import Location
+from api.models.event import EventDetail
 
 
 class UserDetail(models.Model):
@@ -34,3 +35,20 @@ class UserAuthentication(models.Model):
     )
     user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
     auth_id = models.ForeignKey(Authentication, on_delete=models.CASCADE)
+
+
+class UserEvent(models.Model):
+    user_event_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
+    event_id = models.ForeignKey(EventDetail, on_delete=models.CASCADE)
+    time_joined = models.DateTimeField(auto_now_add=True)
+
+
+class UserEventLog(models.Model):
+    user_event_log_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    user_event_id = models.ForeignKey(UserEvent, on_delete=models.CASCADE)
+    has_checked_in = models.BooleanField(default=False)

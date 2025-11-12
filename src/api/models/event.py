@@ -64,20 +64,3 @@ class EventLogNotification(models.Model):
     event_log_id = models.ForeignKey(EventLog, on_delete=models.CASCADE)
     detail = models.TextField(blank=True, max_length=200)
     time_created = models.DateTimeField(auto_now_add=True)
-
-
-class UserEvent(models.Model):
-    user_event_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False
-    )
-    user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
-    event_id = models.ForeignKey(EventDetail, on_delete=models.CASCADE)
-    time_joined = models.DateTimeField(auto_now_add=True)
-
-
-class UserEventLog(models.Model):
-    user_event_log_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False
-    )
-    user_event_id = models.ForeignKey(UserEvent, on_delete=models.CASCADE)
-    has_checked_in = models.BooleanField(default=False)
