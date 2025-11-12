@@ -1,59 +1,8 @@
 from django.db import models
 import uuid
-from enum import StrEnum
-
-
-class UserDetail(models.Model):
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_name = models.CharField(max_length=20)
-    bio = models.TextField(blank=True, max_length=100)
-    invite_code = models.CharField(max_length=20)
-    profile_image = models.BinaryField(blank=True)
-    date_of_birth = models.DateField()
-    time_created = models.DateTimeField(auto_now_add=True)
-
-
-class Location(models.Model):
-    location_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    province = models.CharField(max_length=20)
-    city = models.CharField(max_length=20)
-    town = models.CharField(max_length=20)
-    description = models.TextField(blank=True, max_length=100)
-
-
-class UserLocation(models.Model):
-    user_location_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False
-    )
-    user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
-    location_id = models.ForeignKey(Location, on_delete=models.CASCADE)
-
-
-class AuthType(StrEnum):
-    KAKAO = "kakao"
-    NAVER = "naver"
-    ## PASS = "pass"
-
-
-class Authentication(models.Model):
-    auth_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    type = models.CharField(choices=AuthType.choices())
-    token = models.CharField(blank=True, max_length=100)  ## TODO
-
-
-class UserAuthentication(models.Model):
-    user_auth_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False
-    )
-    user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
-    auth_id = models.ForeignKey(Authentication, on_delete=models.CASCADE)
-
-
-class EventStatus(StrEnum):
-    PLANNED = "planned"
-    ONGOING = "ongoing"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+from helper import EventStatus
+from api.models.user import UserDetail
+from api.models.common import Location
 
 
 class EventDetail(models.Model):
@@ -108,6 +57,15 @@ class EventOrganizer(models.Model):
     user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
 
 
+class EventLogNotification(models.Model):
+    notification_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    event_log_id = models.ForeignKey(EventLog, on_delete=models.CASCADE)
+    detail = models.TextField(blank=True, max_length=200)
+    time_created = models.DateTimeField(auto_now_add=True)
+
+
 class UserEvent(models.Model):
     user_event_id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False
@@ -123,12 +81,3 @@ class UserEventLog(models.Model):
     )
     user_event_id = models.ForeignKey(UserEvent, on_delete=models.CASCADE)
     has_checked_in = models.BooleanField(default=False)
-
-
-class EventLogNotification(models.Model):
-    notification_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False
-    )
-    event_log_id = models.ForeignKey(EventLog, on_delete=models.CASCADE)
-    detail = models.TextField(blank=True, max_length=200)
-    time_created = models.DateTimeField(auto_now_add=True)
