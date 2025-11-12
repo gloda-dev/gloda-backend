@@ -3,8 +3,6 @@ from api.models.user import (
     UserDetail,
     UserLocation,
     UserAuthentication,
-    UserEvent,
-    UserEventLog,
 )
 from api.models.common import Location
 from api.models.event import (
@@ -15,6 +13,8 @@ from api.models.event import (
     EventLog,
     EventOrganizer,
     EventLogNotification,
+    UserEvent,
+    UserEventLog,
 )
 
 

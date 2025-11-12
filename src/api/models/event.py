@@ -1,8 +1,9 @@
 from django.db import models
 import uuid
-from helper import EventStatus
+from helper.types import EventStatus
 from api.models.user import UserDetail
 from api.models.common import Location
+from django_enum import EnumField
 
 
 class EventDetail(models.Model):
@@ -12,7 +13,7 @@ class EventDetail(models.Model):
     main_image = models.BinaryField(blank=True)
     max_participants = models.IntegerField()
     duration = models.IntegerField()  # in minutes
-    status = models.CharField(choices=EventStatus.choices())
+    status = EnumField(EventStatus, default=EventStatus.PLANNED)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
 
@@ -64,3 +65,20 @@ class EventLogNotification(models.Model):
     event_log_id = models.ForeignKey(EventLog, on_delete=models.CASCADE)
     detail = models.TextField(blank=True, max_length=200)
     time_created = models.DateTimeField(auto_now_add=True)
+
+
+class UserEvent(models.Model):
+    user_event_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    user_id = models.ForeignKey(UserDetail, on_delete=models.CASCADE)
+    event_id = models.ForeignKey(EventDetail, on_delete=models.CASCADE)
+    time_joined = models.DateTimeField(auto_now_add=True)
+
+
+class UserEventLog(models.Model):
+    user_event_log_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
+    user_event_id = models.ForeignKey(UserEvent, on_delete=models.CASCADE)
+    has_checked_in = models.BooleanField(default=False)
