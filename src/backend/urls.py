@@ -24,4 +24,8 @@ def root(request):
     return JsonResponse({"message": "Gloda API"})
 
 
-urlpatterns = [path("admin/", admin.site.urls), path("api/", include("api.urls"))]
+urlpatterns = [
+    path("", root),
+    path("admin/", admin.site.urls),
+    path("api/", include("api.urls")),
+]
