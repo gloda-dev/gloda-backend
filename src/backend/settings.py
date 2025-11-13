@@ -42,9 +42,21 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     # "corsheaders",
+    # allauth
+    # "django.contrib.sites",
+    # "allauth",
+    # "allauth.account",
+    # "allauth.socialaccount",
+    # "allauth.socialaccount.providers.naver",
+    # "allauth.socialaccount.providers.kakao",
     # Your app
     "api",
 ]
+
+# AUTHENTICATION_BACKENDS = [
+#     "django.contrib.auth.backends.ModelBackend",
+#     "allauth.account.auth_backends.AuthenticationBackend",
+# ]
 
 
 MIDDLEWARE = [
@@ -87,16 +99,14 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_NAME"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'HOST': os.environ.get("POSTGRES_HOST"),
-        'PORT': os.environ.get("POSTGRES_PORT"),
-        'OPTIONS': {
-            "options": "-c search_path=gloda"
-        }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
+        "OPTIONS": {"options": "-c search_path=gloda"},
     }
 }
 

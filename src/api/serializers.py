@@ -18,79 +18,67 @@ from api.models.event import (
 )
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserDetail
-        fields = "__all__"
-
-
-class UserLocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserLocation
-        fields = "__all__"
-
-
-class UserAuthenticationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserAuthentication
-        fields = "__all__"
-
-
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = "__all__"
-
-
-class EventDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EventDetail
-        fields = "__all__"
+        fields = ["province", "city", "town"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ["category_name", "main_image", "description"]
 
 
-class EventCategorySerializer(serializers.ModelSerializer):
+class SimpleUserDetailSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(read_only=True)
+
     class Meta:
-        model = EventCategory
-        fields = "__all__"
+        model = UserDetail
+        fields = ["user_name", "bio", "profile_image", "location"]
 
 
-class EventLocationSerializer(serializers.ModelSerializer):
+class EventDetailSerializer(serializers.ModelSerializer):
+    organizer = SimpleUserDetailSerializer(read_only=True)
+    location = LocationSerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
+
     class Meta:
-        model = EventLocation
-        fields = "__all__"
+        model = EventDetail
+        fields = [
+            "event_name",
+            "description",
+            "main_image",
+            "capacity",
+            "duration",
+            "address",
+            "organizer",
+            "location",
+            "category",
+        ]
 
 
-class EventLogSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(read_only=True)
+    events = EventDetailSerializer(many=True, read_only=True)
+
     class Meta:
-        model = EventLog
-        fields = "__all__"
+        model = UserDetail
+        fields = [
+            "user_name",
+            "bio",
+            "invite_code",
+            "profile_image",
+            "date_of_birth",
+            "time_created",
+            "location",
+            "events",
+        ]
 
 
-class EventOrganizerSerializer(serializers.ModelSerializer):
+class CreateUserSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(required=True)
+
     class Meta:
-        model = EventOrganizer
-        fields = "__all__"
-
-
-class EventLogNotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EventLogNotification
-        fields = "__all__"
-
-
-class UserEventSerializer(serializers.Serializer):
-    class Meta:
-        model = UserEvent
-        fields = "__all__"
-
-
-class UserEventLogSerializer(serializers.Serializer):
-    class Meta:
-        model = UserEventLog
-        fields = "__all__"
+        model = UserDetail
+        fields = ["user_name", "bio", "profile_image", "date_of_birth", "location"]

@@ -11,9 +11,10 @@ class EventDetail(models.Model):
     event_name = models.CharField(max_length=50)
     description = models.TextField(blank=True, max_length=200)
     main_image = models.BinaryField(blank=True)
-    max_participants = models.IntegerField()
+    capacity = models.IntegerField()
     duration = models.IntegerField()  # in minutes
     status = EnumField(EventStatus, default=EventStatus.PLANNED)
+    address = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
 
