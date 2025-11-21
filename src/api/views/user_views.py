@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action
 from api.models.event import UserDetail, EventDetail
+from api.models.notification import UserNotification
 from api.serializers import (
     UserDetailSerializer,
     SimpleUserDetailSerializer,
@@ -64,3 +65,23 @@ class UserDetailViewSet(viewsets.ViewSet):
             user = serializer.save()
             return Response(UserDetailSerializer(user).data, status=201)
         return Response(serializer.errors, status=400)
+
+    @action(detail=True, methods=["get"])
+    def notifications(self, request, pk=None):
+        """GET /users/{user_id}/notifications/"""
+        try:
+            user = UserNotification.objects.get(pk=pk)
+            notifications = user.notifications.all().order_by("-time_created")
+            notifications_data = [
+                {
+                    "notification_id": n.notification_id,
+                    "detail": n.notification_id.detail,
+                    "time_created": n.notification_id.time_created,
+                    "is_read": n.is_read,
+                }
+                for n in notifications
+            ]
+            return Response(notifications_data)
+
+        except UserDetail.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)

@@ -7,12 +7,14 @@ from django_enum import EnumField
 
 class UserDetail(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20)
     bio = models.TextField(blank=True, max_length=100)
     invite_code = models.CharField(max_length=20)
     profile_image = models.BinaryField(blank=True)
     date_of_birth = models.DateField()
     time_created = models.DateTimeField(auto_now_add=True)
+    username = models.CharField(max_length=30, unique=True)
+    password_hash = models.CharField(max_length=128)
 
 
 class UserLocation(models.Model):

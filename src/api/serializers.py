@@ -16,6 +16,7 @@ from api.models.event import (
     UserEvent,
     UserEventLog,
 )
+from api.models.notification import EventNotification, UserNotification
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -65,7 +66,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDetail
         fields = [
-            "user_name",
+            "name",
             "bio",
             "invite_code",
             "profile_image",
@@ -82,3 +83,17 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDetail
         fields = ["user_name", "bio", "profile_image", "date_of_birth", "location"]
+
+
+class EventNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventNotification
+        fields = ["event_id", "detail", "time_created"]
+
+
+class UserNotificationSerializer(serializers.ModelSerializer):
+    notification = EventNotificationSerializer(read_only=True)
+
+    class Meta:
+        model = UserNotification
+        fields = ["notification", "is_read"]  # TODO: check requirements
