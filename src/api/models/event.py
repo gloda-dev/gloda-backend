@@ -17,6 +17,8 @@ class EventDetail(models.Model):
     address = models.CharField(max_length=100)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
+    view_count = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
 
 
 class Category(models.Model):

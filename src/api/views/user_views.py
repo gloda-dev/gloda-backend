@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, generics, permissions
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from api.models.event import UserDetail, EventDetail
 from api.models.notification import UserNotification
@@ -9,7 +9,6 @@ from api.serializers import (
     EventDetailSerializer,
     CreateUserSerializer,
 )
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
 
@@ -78,6 +77,7 @@ class UserDetailViewSet(viewsets.ViewSet):
                     "detail": n.notification_id.detail,
                     "time_created": n.notification_id.time_created,
                     "is_read": n.is_read,
+                    "from_admin": n.notification_id.from_admin,
                 }
                 for n in notifications
             ]

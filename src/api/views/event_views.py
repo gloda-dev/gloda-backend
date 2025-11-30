@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from api.models.event import (
@@ -19,6 +18,9 @@ class EventViewSet(viewsets.ViewSet):
         try:
             event = EventDetail.objects.get(pk=pk)
             serializer = EventDetailSerializer(event)
+
+            EventDetail.objects.filter(pk=pk).update(view_count=event.view_count + 1)
+
             return Response(serializer.data)
 
         except EventDetail.DoesNotExist:
@@ -111,7 +113,7 @@ class EventViewSet(viewsets.ViewSet):
                 return Response(
                     {"error": "Only organizer can create notification"}, status=403
                 )
-            
+
             notification = EventNotification.objects.create(
                 event_id=event, detail=request.data.get("detail", "")
             )

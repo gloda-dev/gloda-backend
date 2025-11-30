@@ -11,6 +11,9 @@ class EventNotification(models.Model):
     event_id = models.ForeignKey(EventDetail, on_delete=models.CASCADE)
     detail = models.TextField(blank=True, max_length=200)
     time_created = models.DateTimeField(auto_now_add=True)
+    from_admin = models.BooleanField(
+        default=False
+    )  # populated when notification is from admin
 
 
 class UserNotification(models.Model):

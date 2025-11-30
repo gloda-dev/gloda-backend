@@ -3,6 +3,7 @@ import uuid
 from helper.types import AuthType
 from api.models.common import Location
 from django_enum import EnumField
+from datetime import datetime
 
 
 class UserDetail(models.Model):
@@ -13,8 +14,11 @@ class UserDetail(models.Model):
     profile_image = models.BinaryField(blank=True)
     date_of_birth = models.DateField()
     time_created = models.DateTimeField(auto_now_add=True)
-    username = models.CharField(max_length=30, unique=True)
-    password_hash = models.CharField(max_length=128)
+    username = models.CharField(
+        max_length=30, blank=True
+    )  # TODO: should be unique when put into use
+    password_hash = models.CharField(max_length=128, blank=True)
+    last_login = models.DateTimeField(default=datetime.now)
 
 
 class UserLocation(models.Model):
