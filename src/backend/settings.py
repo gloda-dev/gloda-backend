@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party
     "rest_framework",
+    "django_celery_results",
+    "django_celery_beat",
     # "corsheaders",
     # allauth
     # "django.contrib.sites",
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     # "allauth.socialaccount.providers.kakao",
     # Your app
     "api",
+    "notifications",
 ]
 
 # AUTHENTICATION_BACKENDS = [
@@ -144,3 +147,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CELERY_BROKER_URL = "django://"
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

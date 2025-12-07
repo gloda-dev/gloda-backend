@@ -25,6 +25,21 @@ class UserDetailViewSet(viewsets.ViewSet):
         except UserDetail.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
+    @action(detail=True, methods=["post"])
+    def register_push_token(self, request, pk=None):
+        """POST /users/{user_id}/register-push-token/"""
+        ## TODO: need to test after deployment
+        user = self.get_object()
+        token = request.data.get("expo_push_token")
+
+        if not token:
+            return Response({"error": "Token required"}, status=400)
+
+        user.expo_push_token = token
+        user.save()
+
+        return Response({"status": "token saved"})
+
     @action(
         detail=True, methods=["get"], permission_classes=[permissions.IsAuthenticated]
     )

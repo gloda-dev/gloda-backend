@@ -19,6 +19,7 @@ class UserDetail(models.Model):
     )  # TODO: should be unique when put into use
     password_hash = models.CharField(max_length=128, blank=True)
     last_login = models.DateTimeField(default=datetime.now)
+    expo_push_token = models.CharField(max_length=255, blank=True, null=True)
 
 
 class UserLocation(models.Model):
