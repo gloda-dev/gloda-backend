@@ -13,7 +13,7 @@ from rest_framework.response import Response
 
 
 class UserDetailViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def retrieve(self, request, pk=None):
         """GET /users/{user_id}/"""
@@ -24,9 +24,9 @@ class UserDetailViewSet(viewsets.ViewSet):
 
         except UserDetail.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
-
-    @action(detail=True, methods=["post"])
-    def register_push_token(self, request, pk=None):
+        
+    @action(detail=True, methods=['post'])
+    def register_push_token(self, request, pk=None): 
         """POST /users/{user_id}/register-push-token/"""
         ## TODO: need to test after deployment
         user = self.get_object()
@@ -41,8 +41,7 @@ class UserDetailViewSet(viewsets.ViewSet):
         return Response({"status": "token saved"})
 
     @action(
-        detail=True, methods=["get"], permission_classes=[permissions.IsAuthenticated]
-    )
+        detail=True, methods=["get"])
     def myinfo(self, request, pk=None):
         """GET /users/{user_id}/myinfo/"""
         try:
