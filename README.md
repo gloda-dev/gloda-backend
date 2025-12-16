@@ -33,6 +33,7 @@ gloda-backend is a Django-based backend service that provides RESTful APIs and d
     ```bash
     python -m venv venv
     source venv/bin/activate
+    cd src
     ```
 
 2. **Install dependencies**
