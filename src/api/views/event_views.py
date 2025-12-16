@@ -13,7 +13,7 @@ from api.models.notification import EventNotification
 
 
 class EventViewSet(viewsets.ViewSet):
-    permissions = [permissions.IsAuthenticated] 
+    permissions = [permissions.IsAuthenticated]
     # TODO: should we allow unauthenticated access for view event?
 
     def retrieve(self, request, pk=None):
