@@ -36,7 +36,7 @@ class SimpleUserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDetail
-        fields = ["user_name", "bio", "profile_image", "location"]
+        fields = ["name", "bio", "profile_image", "location"]
 
 
 class EventDetailSerializer(serializers.ModelSerializer):
@@ -82,7 +82,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDetail
-        fields = ["user_name", "bio", "profile_image", "date_of_birth", "location"]
+        fields = ["name", "bio", "profile_image", "date_of_birth", "location"]
 
 
 class EventNotificationSerializer(serializers.ModelSerializer):

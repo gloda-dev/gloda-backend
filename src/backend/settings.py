@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 import os
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_celery_results",
     "django_celery_beat",
+    ".onrender.com",
     # "corsheaders",
     # allauth
     # "django.contrib.sites",
@@ -101,13 +103,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.db.backends.sqlite3",
+        "URL": dj_database_url.parse(os.environ.get("POSTGRES_URL")),
         "NAME": os.environ.get("POSTGRES_NAME"),
         "USER": os.environ.get("POSTGRES_USER"),
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
         "PORT": os.environ.get("POSTGRES_PORT"),
-        "OPTIONS": {"options": "-c search_path=gloda"},
     }
 }
 

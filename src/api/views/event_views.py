@@ -1,12 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from api.models.event import (
     UserDetail,
     EventDetail,
     UserEvent,
     EventOrganizer,
-    UserNotification,
 )
+from api.models.notification import UserNotification
 from rest_framework.response import Response
 from api.serializers import EventDetailSerializer, EventNotificationSerializer
 from api.models.notification import EventNotification

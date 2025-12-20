@@ -7,6 +7,7 @@ click-didyoumean==0.3.1
 click-plugins==1.1.1.2
 click-repl==0.3.0
 cron_descriptor==2.0.6
+dj-database-url==3.0.1
 Django==5.2.8
 django-allauth==65.13.0
 django-celery==3.1.17
