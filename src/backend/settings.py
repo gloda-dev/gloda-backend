@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # "allauth.socialaccount.providers.kakao",
     # Your app
     "api",
+    "gloda-api.onrender.com",
 ]
 
 # AUTHENTICATION_BACKENDS = [
