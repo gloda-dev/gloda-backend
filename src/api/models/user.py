@@ -3,7 +3,8 @@ import uuid
 from helper.types import AuthType
 from api.models.common import Location
 from django_enum import EnumField
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 class UserDetail(models.Model):
@@ -33,7 +34,39 @@ class UserLocation(models.Model):
 class Authentication(models.Model):
     auth_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = EnumField(AuthType)
-    token = models.CharField(blank=True, max_length=100)  ## TODO
+    provider_user_id = models.TextField(blank=True)
+    provider_access_token = models.TextField(blank=True)
+    provider_access_token_expires_at = models.DateTimeField(null=True, blank=True)
+    provider_refresh_token = models.TextField(blank=True)
+    provider_refresh_token_expires_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [('type', 'provider_user_id')]
+
+    def set_token_expiration(self, expires_in_seconds, token_type='access'):
+        """
+        Helper method to convert Kakao's expires_in (integer seconds) to DateTime.
+        Sets expiration based on current time (timezone.now()).
+        Usage: auth.set_token_expiration(21600, 'access')
+        """
+        if expires_in_seconds:
+            expiration_time = timezone.now() + timedelta(seconds=expires_in_seconds)
+            if token_type == 'access':
+                self.provider_access_token_expires_at = expiration_time
+            elif token_type == 'refresh':
+                self.provider_refresh_token_expires_at = expiration_time
+
+    def is_access_token_expired(self):
+        """Check if access token has expired."""
+        if not self.provider_access_token_expires_at:
+            return True
+        return timezone.now() >= self.provider_access_token_expires_at
+
+    def is_refresh_token_expired(self):
+        """Check if refresh token has expired."""
+        if not self.provider_refresh_token_expires_at:
+            return False  # If no expiration set, assume not expired
+        return timezone.now() >= self.provider_refresh_token_expires_at
 
 
 class UserAuthentication(models.Model):
