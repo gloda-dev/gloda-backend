@@ -16,7 +16,7 @@ gloda-backend is a Django-based backend service that provides RESTful APIs and d
 ### User Endpoints
 - `POST /api/users/` - Create a new user
 - `GET /api/users/{id}/` - Retrieve user details
-- `/api/
+- `/api/auth/kakao/redirect` - Kakao redirect
 
 ### Event Endpoints
 
