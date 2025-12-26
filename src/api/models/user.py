@@ -33,8 +33,8 @@ class UserLocation(models.Model):
 
 class Authentication(models.Model):
     auth_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    type = EnumField(AuthType)
-    provider_user_id = models.TextField(blank=True)
+    auth_type = EnumField(AuthType)
+    provider_user_id = models.TextField(blank=True) # TODO: check whether to remove this field?
     provider_access_token = models.TextField(blank=True)
     provider_access_token_expires_at = models.DateTimeField(null=True, blank=True)
     provider_refresh_token = models.TextField(blank=True)
