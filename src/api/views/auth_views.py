@@ -1,15 +1,27 @@
 # Function-based views for authentication using Kakao & Naver APIs
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
+from datetime import date
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from urllib.parse import unquote
+from urllib.parse import unquote, urlencode
 import requests
 
-from src.api.models.user import Authentication, UserAuthentication
+from src.api.models.user import Authentication, UserAuthentication, UserDetail
 from src.backend import settings
 from src.helper.types import AuthType
 
+# Utils
+def redirect_to_frontend(redirect_uri: str, query_params):
+    """
+    A custom redirect method
+    """
+    response = HttpResponse("", status=302)
+    response["Location"] = f"{redirect_uri}?{urlencode(query_params)}"
+    return response
+
+
+# Kakao
 def kakao_redirect(request: HttpRequest) -> HttpResponse:
     """
     Once receiving the authorization code from Kakao, this function will:
@@ -25,7 +37,8 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
 
     """
     # Step 1: Parse request parameters
-    frontend_redirect_uri = unquote(request.GET.get("state")) # same as the one we sent from FO to kakao api
+    state = request.GET.get("state") # for the frontend redirect uri + CSRF check (need to be same as the one we sent from FO to kakao api)
+    frontend_redirect_uri = unquote(state)
     authorization_code = request.GET.get("code") # from kakao GET api response
     auth_error_code = request.GET.get("error") # error code from Kakao GET api
     auth_error_description = request.GET.get("error_description", "Failed to retrieve authorization code")
@@ -67,6 +80,7 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
     user_info_response = requests.post(kakao_user_info_url, headers=kakao_user_info_headers)
     user_info_response_json = user_info_response.json()
     user_kakao_id = user_info_response_json.get("id")
+    user_kakao_info = user_info_response_json.get("kakao_account")
 
     if not user_info_response.ok or not user_kakao_id:
         return JsonResponse({"error": "Failed to retrieve user info"}, status=user_info_response.status_code)
@@ -83,24 +97,53 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
 
         # If user_id found, then redirect to the frontend with status=existing
         if user_id:
-            # TODO: call the redirect function
-            return None
+            # TODO: call the redirect function with the new token
+            return redirect_to_frontend(frontend_redirect_uri, {
+                "status": "existing",
+                "state": state,
+                # TODO: additional params
+            })
 
     # Otherwise, create a new user object
     # New Authentication object
     refresh_token = token_response_json.get("refresh_token")
+    access_token_expires_in = token_response_json.get("expires_in",0)
+    refresh_token_expires_in = token_response_json.get("refresh_token_expires_in",0)
+
+    new_auth = Authentication.objects.create(
+        auth_type = AuthType.KAKAO,
+        provider_user_id=user_kakao_id,
+        provider_access_token = access_token,
+        provider_refresh_token = refresh_token,
+    )
+    new_auth.set_token_expiration(access_token_expires_in, 'access')
+    new_auth.set_token_expiration(refresh_token_expires_in, 'refresh')
+    new_auth.save()
 
     # New UserDetail object
-    # New UserAuthentication object
-    # TODO: call the redirect function
-    return None
-
-
-
-# Helper function?
-def kakao_handle_token(request: HttpRequest) -> HttpResponse:
-    """
+    birth_year = int(user_kakao_info.get("birthyear"))
+    birth_day_before = user_kakao_info.get("birthday")
+    birth_month = int(birth_day_before[:2])
+    birth_day = int(birth_day_before[2:])
     
-    """
-    return None
+    new_user = UserDetail.objects.create(
+        name=user_kakao_info.get("name"),
+        # TODO: check if we should bring the kakao profile image as well
+        date_of_birth = date(birth_year, birth_month, birth_day),
+        username=user_kakao_info.get("profile").get("nickname")
+    )
 
+    # New UserAuthentication object
+    UserAuthentication.objects.create(
+        user_id = new_user.user_id,
+        auth_id = new_auth.auth_id
+    )
+
+    # TODO: call the redirect function
+    return redirect_to_frontend(frontend_redirect_uri, {
+        "status": "new",
+        "state": state,
+    })
+
+
+# Naver
