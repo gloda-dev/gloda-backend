@@ -20,7 +20,6 @@ def redirect_to_frontend(redirect_uri: str, query_params):
     response["Location"] = f"{redirect_uri}?{urlencode(query_params)}"
     return response
 
-
 # Kakao
 def kakao_redirect(request: HttpRequest) -> HttpResponse:
     """
@@ -48,13 +47,14 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
         return JsonResponse({"error": auth_error_description}, status=500) # for now, returning internal service error
 
     # Step 2.2: Make POST request
-    base_url = f"{request.scheme}://{request.get_host}"
-    redirect_uri = f"{base_url}/api/auth/kakao/redirect" # need to be the current uri (to be matched with the first api)
+    base_url = f"{request.scheme}://{request.get_host()}"
+    redirect_uri = f"{base_url}/api/auth/kakao/callback" # need to be the current uri (to be matched with the first api)
 
     token_request_url = "https://kauth.kakao.com/oauth/token"
     token_request_body = {
         "grant_type": "authorization_code",
         "client_id": settings.KAKAO_REST_API_KEY,
+        "client_secret": settings.KAKAO_REST_API_SECRET,
         "redirect_uri": redirect_uri,
         "code": authorization_code,
     }
@@ -88,6 +88,7 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
     # Step 3.2: Check if the current user already exists
     # (Django model lookup will raise DoesNotExist or MultipleObjectsReturned)
     # TODO: check whether to use with try & catch
+    # TODO: handle the case when returning the DoesNotExist error
     user_auth_item = Authentication.objects.get(provider_user_id=user_kakao_id, auth_type=AuthType.KAKAO)
 
     # If exists, then get the actual user ID
