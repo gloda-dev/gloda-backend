@@ -103,12 +103,11 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
 
                 # If user_id found, then redirect to the frontend with status=existing
                 if user_id:
-                    # TODO: call the redirect function with the new token
                     return redirect_to_frontend(frontend_redirect_uri, {
                         "status": "existing",
                         "state": state,
                         "userId": user_id,
-                        # TODO: additional params
+                        # TODO: additional params (token)
                     })
             except ObjectDoesNotExist:
                 user_item = None
@@ -161,11 +160,10 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
 
         # # New UserAuthentication object
         UserAuthentication.objects.create(
-            user_id = new_user.user_id,
-            auth_id = new_auth.auth_id
+            user_id = new_user,
+            auth_id = new_auth
         )
 
-        # TODO: call the redirect function
         return redirect_to_frontend(frontend_redirect_uri, {
             "status": "new",
             "state": state,
