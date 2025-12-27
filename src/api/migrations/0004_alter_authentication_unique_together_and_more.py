@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name="authentication",
-            unique_together={("type", "provider_user_id")},
-        ),
         migrations.AddField(
             model_name="authentication",
             name="provider_access_token",
@@ -42,5 +38,9 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="authentication",
             name="token",
+        ),
+        migrations.AlterUniqueTogether(
+            name="authentication",
+            unique_together={("type", "provider_user_id")},
         ),
     ]

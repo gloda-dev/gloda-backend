@@ -7,9 +7,9 @@ from rest_framework import status
 from urllib.parse import unquote, urlencode
 import requests
 
-from src.api.models.user import Authentication, UserAuthentication, UserDetail
-from src.backend import settings
-from src.helper.types import AuthType
+from api.models.user import Authentication, UserAuthentication, UserDetail
+from backend import settings
+from helper.types import AuthType
 
 # Utils
 def redirect_to_frontend(redirect_uri: str, query_params):

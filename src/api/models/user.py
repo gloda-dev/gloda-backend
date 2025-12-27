@@ -41,7 +41,7 @@ class Authentication(models.Model):
     provider_refresh_token_expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = [('type', 'provider_user_id')]
+        unique_together = [('auth_type', 'provider_user_id')]
 
     def set_token_expiration(self, expires_in_seconds, token_type='access'):
         """
