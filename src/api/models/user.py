@@ -13,7 +13,7 @@ class UserDetail(models.Model):
     bio = models.TextField(blank=True, max_length=100)
     invite_code = models.CharField(max_length=20)
     profile_image = models.BinaryField(blank=True)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(blank=True, null=True)
     time_created = models.DateTimeField(auto_now_add=True)
     username = models.CharField(
         max_length=30, blank=True

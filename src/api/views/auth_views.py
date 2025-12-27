@@ -1,5 +1,6 @@
 # Function-based views for authentication using Kakao & Naver APIs
 from datetime import date
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -76,9 +77,13 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
         "Authorization": f"Bearer ${access_token}",
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
     }
+    kakao_user_info_data = {
+       'property_keys': '["kakao_account.profile"]'
+    }
 
-    user_info_response = requests.post(kakao_user_info_url, headers=kakao_user_info_headers)
+    user_info_response = requests.post(kakao_user_info_url, data=kakao_user_info_data, headers=kakao_user_info_headers)
     user_info_response_json = user_info_response.json()
+
     user_kakao_id = user_info_response_json.get("id")
     user_kakao_info = user_info_response_json.get("kakao_account")
 
@@ -87,64 +92,89 @@ def kakao_redirect(request: HttpRequest) -> HttpResponse:
 
     # Step 3.2: Check if the current user already exists
     # (Django model lookup will raise DoesNotExist or MultipleObjectsReturned)
-    # TODO: check whether to use with try & catch
-    # TODO: handle the case when returning the DoesNotExist error
-    user_auth_item = Authentication.objects.get(provider_user_id=user_kakao_id, auth_type=AuthType.KAKAO)
+    try:
+        auth_item = Authentication.objects.get(provider_user_id=user_kakao_id, auth_type=AuthType.KAKAO)
+        # If exists, then get the actual user ID
+        if auth_item:
+            print("User with this kakao account found")
+            try:
+                user_auth_item = UserAuthentication.objects.get(auth_id=auth_item.auth_id)
+                user_id = user_auth_item.user_id
 
-    # If exists, then get the actual user ID
-    if user_auth_item:
-        user_item = UserAuthentication.objects.get(auth_id=user_auth_item.auth_id)
-        user_id = user_item.user_id
+                # If user_id found, then redirect to the frontend with status=existing
+                if user_id:
+                    # TODO: call the redirect function with the new token
+                    return redirect_to_frontend(frontend_redirect_uri, {
+                        "status": "existing",
+                        "state": state,
+                        "userId": user_id,
+                        # TODO: additional params
+                    })
+            except ObjectDoesNotExist:
+                user_item = None
+                try:
+                    user_item = UserDetail.objects.get(
+                        # TODO: check if we should bring the kakao profile image as well
+                        username=user_kakao_info.get("profile").get("nickname")
+                    )
+                except ObjectDoesNotExist:
+                    user_item = UserDetail.objects.create(
+                        # TODO: check if we should bring the kakao profile image as well
+                        username=user_kakao_info.get("profile").get("nickname")
+                    )
 
-        # If user_id found, then redirect to the frontend with status=existing
-        if user_id:
-            # TODO: call the redirect function with the new token
-            return redirect_to_frontend(frontend_redirect_uri, {
-                "status": "existing",
-                "state": state,
-                # TODO: additional params
-            })
+                # New UserAuthentication object
+                UserAuthentication.objects.create(
+                    user_id = user_item,
+                    auth_id = auth_item
+                )
 
-    # Otherwise, create a new user object
-    # New Authentication object
-    refresh_token = token_response_json.get("refresh_token")
-    access_token_expires_in = token_response_json.get("expires_in",0)
-    refresh_token_expires_in = token_response_json.get("refresh_token_expires_in",0)
+                return redirect_to_frontend(frontend_redirect_uri, {
+                    "status": "new",
+                    "state": state,
+                    "userId": user_item.user_id,
+                    # TODO: additional params
+                })
+    except ObjectDoesNotExist:
+        print("User with this kakao account not found")
+        # Otherwise, create a new user object
+        # New Authentication object
+        refresh_token = token_response_json.get("refresh_token")
+        access_token_expires_in = token_response_json.get("expires_in",0)
+        refresh_token_expires_in = token_response_json.get("refresh_token_expires_in",0)
 
-    new_auth = Authentication.objects.create(
-        auth_type = AuthType.KAKAO,
-        provider_user_id=user_kakao_id,
-        provider_access_token = access_token,
-        provider_refresh_token = refresh_token,
-    )
-    new_auth.set_token_expiration(access_token_expires_in, 'access')
-    new_auth.set_token_expiration(refresh_token_expires_in, 'refresh')
-    new_auth.save()
+        new_auth = Authentication.objects.create(
+            auth_type = AuthType.KAKAO,
+            provider_user_id=user_kakao_id,
+            provider_access_token = access_token,
+            provider_refresh_token = refresh_token,
+        )
+        new_auth.set_token_expiration(access_token_expires_in, 'access')
+        new_auth.set_token_expiration(refresh_token_expires_in, 'refresh')
+        new_auth.save()
 
-    # New UserDetail object
-    birth_year = int(user_kakao_info.get("birthyear"))
-    birth_day_before = user_kakao_info.get("birthday")
-    birth_month = int(birth_day_before[:2])
-    birth_day = int(birth_day_before[2:])
-    
-    new_user = UserDetail.objects.create(
-        name=user_kakao_info.get("name"),
-        # TODO: check if we should bring the kakao profile image as well
-        date_of_birth = date(birth_year, birth_month, birth_day),
-        username=user_kakao_info.get("profile").get("nickname")
-    )
+        # New UserDetail object
+        new_user = UserDetail.objects.create(
+            # TODO: check if we should bring the kakao profile image as well
+            username=user_kakao_info.get("profile").get("nickname")
+        )
 
-    # New UserAuthentication object
-    UserAuthentication.objects.create(
-        user_id = new_user.user_id,
-        auth_id = new_auth.auth_id
-    )
+        # # New UserAuthentication object
+        UserAuthentication.objects.create(
+            user_id = new_user.user_id,
+            auth_id = new_auth.auth_id
+        )
 
-    # TODO: call the redirect function
-    return redirect_to_frontend(frontend_redirect_uri, {
-        "status": "new",
-        "state": state,
-    })
+        # TODO: call the redirect function
+        return redirect_to_frontend(frontend_redirect_uri, {
+            "status": "new",
+            "state": state,
+            "userId": new_user.user_id,
+            # TODO: check whether to create token for the new user as well
+        })
+
+    except MultipleObjectsReturned:
+        return JsonResponse({"error": "Multiple users with the same account detected"}, status=status.HTTP_409_CONFLICT)
 
 
 # Naver
