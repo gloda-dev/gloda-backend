@@ -29,6 +29,10 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 KAKAO_REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
 KAKAO_REST_API_SECRET = os.environ.get("KAKAO_REST_API_SECRET")
 
+# NAVER REST API KEY
+NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID")
+NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
