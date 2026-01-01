@@ -11,6 +11,10 @@ gloda-backend is a Django-based backend service that provides RESTful APIs and d
 - Input validation and error handling
 - Triggered notifications on specific events with Django Celery Beat
 
+## Deployment
+
+The application is deployed on Render and available at: [https://gloda-api.onrender.com/](https://gloda-api.onrender.com/)
+
 ## API Documentation
 
 ### User Endpoints
@@ -56,5 +60,3 @@ gloda-backend is a Django-based backend service that provides RESTful APIs and d
     ```bash
     python manage.py runserver
     ```
-
-The server will be available at `http://127.0.0.1:8000/`.

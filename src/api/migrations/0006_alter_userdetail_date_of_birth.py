@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0005_remove_authentication_api_authentication_type_authtype_and_more"),
     ]

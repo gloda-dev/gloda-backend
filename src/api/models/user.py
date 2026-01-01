@@ -34,16 +34,18 @@ class UserLocation(models.Model):
 class Authentication(models.Model):
     auth_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     auth_type = EnumField(AuthType)
-    provider_user_id = models.TextField(blank=True) # TODO: check whether to remove this field?
+    provider_user_id = models.TextField(
+        blank=True
+    )  # TODO: check whether to remove this field?
     provider_access_token = models.TextField(blank=True)
     provider_access_token_expires_at = models.DateTimeField(null=True, blank=True)
     provider_refresh_token = models.TextField(blank=True)
     provider_refresh_token_expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = [('auth_type', 'provider_user_id')]
+        unique_together = [("auth_type", "provider_user_id")]
 
-    def set_token_expiration(self, expires_in_seconds, token_type='access'):
+    def set_token_expiration(self, expires_in_seconds, token_type="access"):
         """
         Helper method to convert Kakao's expires_in (integer seconds) to DateTime.
         Sets expiration based on current time (timezone.now()).
@@ -51,9 +53,9 @@ class Authentication(models.Model):
         """
         if expires_in_seconds:
             expiration_time = timezone.now() + timedelta(seconds=expires_in_seconds)
-            if token_type == 'access':
+            if token_type == "access":
                 self.provider_access_token_expires_at = expiration_time
-            elif token_type == 'refresh':
+            elif token_type == "refresh":
                 self.provider_refresh_token_expires_at = expiration_time
 
     def is_access_token_expired(self):
