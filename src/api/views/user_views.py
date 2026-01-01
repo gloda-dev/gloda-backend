@@ -9,11 +9,14 @@ from api.serializers import (
     EventDetailSerializer,
     CreateUserSerializer,
 )
+from api.models.common import Location
+from api.models.user import UserLocation
+
 from rest_framework.response import Response
 
 
 class UserDetailViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = []
 
     def retrieve(self, request, pk=None):
         """GET /users/{user_id}/"""
@@ -71,10 +74,20 @@ class UserDetailViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["post"])
     def create_user(self, request):
-        """POST /users/create/"""
+        """POST /users/create_user/"""
         serializer = CreateUserSerializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.save()
+            location_data = request.data.get("location_id")
+
+            if location_data:
+                try:
+                    location = Location.objects.get(pk=location_data)
+                    UserLocation.objects.create(user_id=user, location_id=location)
+                except Location.DoesNotExist:
+                    return Response({"error": "Location not found"}, status=404)
+
             return Response(UserDetailSerializer(user).data, status=201)
         return Response(serializer.errors, status=400)
 

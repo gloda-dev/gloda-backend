@@ -13,7 +13,7 @@ from api.models.notification import EventNotification
 
 
 class EventViewSet(viewsets.ViewSet):
-    permissions = [permissions.IsAuthenticated]
+    permission_classes = []
     # TODO: should we allow unauthenticated access for view event?
 
     def retrieve(self, request, pk=None):
@@ -65,13 +65,15 @@ class EventViewSet(viewsets.ViewSet):
             user = UserDetail.objects.get(pk=user_id)
             event = EventDetail.objects.get(pk=pk)
 
-            if UserEvent.objects.filter(user=user, event=event).exists():
+            if UserEvent.objects.filter(user_id=user, event_id=event).exists():
                 return Response({"message": "Already joined"})
 
-            if event.participants.count() >= event.capacity:
+            participants = UserEvent.objects.filter(event_id=event)
+
+            if participants.count() >= event.capacity:
                 return Response({"error": "Event is full"}, status=400)
 
-            UserEvent.objects.create(user=user, event=event)
+            UserEvent.objects.create(user_id=user, event_id=event)
             return Response({"message": "Joined successfully"}, status=201)
 
         except (UserDetail.DoesNotExist, EventDetail.DoesNotExist):
@@ -79,7 +81,7 @@ class EventViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["post"])
     def create_event(self, request):
-        """POST /events/create/"""
+        """POST /events/create_event/"""
         user_id = request.data.get("user_id")
         if not user_id:
             return Response({"error": "user_id required"}, status=400)

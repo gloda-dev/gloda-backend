@@ -78,11 +78,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(required=True)
-
     class Meta:
         model = UserDetail
-        fields = ["name", "bio", "profile_image", "date_of_birth", "location"]
+        fields = ["name", "bio", "profile_image", "date_of_birth"]
 
 
 class EventNotificationSerializer(serializers.ModelSerializer):
